@@ -4,7 +4,10 @@ import { GalleryPicture, Gallery } from './ActionTypes';
 import { galleryPictureSchema } from 'app/reducers';
 import { uploadFile } from './FileActions';
 import PromisePool from 'es6-promise-pool';
-import { type GalleryPictureEntity } from 'app/reducers/galleryPictures';
+import {
+  type GalleryPictureEntity,
+  SelectGalleryPicturesByGalleryId,
+} from 'app/reducers/galleryPictures';
 import callAPI from 'app/actions/callAPI';
 import type { EntityID, Thunk } from 'app/types';
 
@@ -31,6 +34,23 @@ export function fetch(
         propagateError: true,
       })
     );
+  };
+}
+
+export function fetchAll(galleryId: number): Thunk<*> {
+  return (dispatch, getState) => {
+    return dispatch(
+      callAPI({
+        types: GalleryPicture.FETCH_ALL,
+        endpoint: `/galleries/${galleryId}/pictures-all/`,
+        useCache: false,
+        schema: [galleryPictureSchema],
+        meta: {
+          errorMessage: 'Henting av alle bilder feilet',
+        },
+        propagateError: true,
+      })
+    ).then(() => SelectGalleryPicturesByGalleryId(getState(), { galleryId }));
   };
 }
 
