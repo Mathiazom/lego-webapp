@@ -5,8 +5,8 @@ import { galleryPictureSchema } from 'app/reducers';
 import { uploadFile } from './FileActions';
 import PromisePool from 'es6-promise-pool';
 import {
-  type GalleryPictureEntity,
-  SelectGalleryPicturesByGalleryId,
+  type GalleryPictureEntity, selectGalleryPictureById,
+  SelectGalleryPicturesByGalleryId
 } from 'app/reducers/galleryPictures';
 import callAPI from 'app/actions/callAPI';
 import type { EntityID, Thunk } from 'app/types';
@@ -33,7 +33,7 @@ export function fetch(
         },
         propagateError: true,
       })
-    );
+    ).then(() => SelectGalleryPicturesByGalleryId(getState(), { galleryId }));
   };
 }
 
@@ -59,21 +59,26 @@ export function fetchSiblingGallerPicture(
   currentPictureId: EntityID,
   next: Boolean
 ) {
-  const rawCursor = `p=${currentPictureId}&r=${next ? 0 : 1}`;
-  const cursor = Buffer.from(rawCursor).toString('base64');
-  return callAPI({
-    types: GalleryPicture.FETCH_SIBLING,
-    endpoint: `/galleries/${galleryId}/pictures/`,
-    query: {
-      page_size: 1,
-      cursor,
-    },
-    schema: [galleryPictureSchema],
-    meta: {
-      errorMessage: 'Henting av bilde feilet',
-    },
-    propagateError: true,
-  });
+  return (dispatch, getState) => {
+    return dispatch(() => {
+      const rawCursor = `p=${currentPictureId}&r=${next ? 0 : 1}`;
+      const cursor = Buffer.from(rawCursor).toString('base64');
+      return callAPI({
+        types: GalleryPicture.FETCH_SIBLING,
+        endpoint: `/galleries/${galleryId}/pictures/`,
+        query: {
+          page_size: 1,
+          cursor,
+        },
+        schema: [galleryPictureSchema],
+        meta: {
+          errorMessage: 'Henting av bilde feilet',
+        },
+        propagateError: true,
+      });
+    }
+  ).then(() => selectGalleryPictureById(getState(), { pictureId:currentPictureId }))
+  }
 }
 
 export function fetchGalleryPicture(

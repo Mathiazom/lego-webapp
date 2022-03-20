@@ -59,24 +59,43 @@ export default class GalleryDetail extends Component<Props, State> {
     this.setState({ downloading: true });
     const finishDownload = () => this.setState({ downloading: false });
     // Make sure all pictures are fetched before download and zipping
-    this.props
-      .fetchAll(this.props.gallery.id)
-      .then((allPictures) => {
-        // Extract filenames from urls (a little hacky, should get from backend)
-        const names = allPictures.map((picture) =>
+    let blobs = [];
+    this.downloadNext(false, 0, 0, blobs)
+      .then(({ pictures, blobs })=> {
+        console.log("Finished download");
+        console.log(pictures);
+        console.log(blobs);
+        const names = pictures.map((picture) =>
           picture.file.split('/').pop()
         );
-        const urls = allPictures.map((picture) => picture.rawFile);
-        this.downloadFiles(urls)
-          .then((blobs) =>
-            this.zipFiles(this.props.gallery.title, names, blobs).finally(
-              finishDownload
-            )
-          )
-          .catch(finishDownload);
-      })
-      .catch(finishDownload);
+        console.log(names);
+        this.zipFiles(this.props.gallery.title, names, blobs).finally(
+          finishDownload
+        )
+      }).catch(finishDownload);
   };
+
+  downloadNext = (next, index, accum, blobsAccum) => {
+    return this.props.fetch(this.props.gallery.id, {next:next,filters:{}}).then((pictures) => {
+      const extra = pictures.length - accum;
+      accum = pictures.length;
+      const urls = pictures.slice(index).map((picture) => picture.rawFile);
+      console.log(urls);
+      index += extra;
+      console.log(index);
+      return this.downloadFiles(urls)
+        .then((blobs) => {
+          blobsAccum.push(...blobs);
+          console.log(blobsAccum);
+          console.log(this.props.hasMore);
+          if (this.props.hasMore) {
+            return this.downloadNext(true,index,accum,blobsAccum);
+          }
+          console.log({ pictures, blobsAccum });
+          return { pictures, blobs: blobsAccum };
+        });
+    })
+  }
 
   downloadFiles = (urls: string[]) =>
     Promise.all(
