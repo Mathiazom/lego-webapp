@@ -4,7 +4,10 @@ import { GalleryPicture, Gallery } from './ActionTypes';
 import { galleryPictureSchema } from 'app/reducers';
 import { uploadFile } from './FileActions';
 import PromisePool from 'es6-promise-pool';
-import { type GalleryPictureEntity } from 'app/reducers/galleryPictures';
+import {
+  type GalleryPictureEntity, selectGalleryPictureById,
+  SelectGalleryPicturesByGalleryId
+} from 'app/reducers/galleryPictures';
 import callAPI from 'app/actions/callAPI';
 import type { EntityID, Thunk } from 'app/types';
 
@@ -30,7 +33,7 @@ export function fetch(
         },
         propagateError: true,
       })
-    );
+    ).then(() => SelectGalleryPicturesByGalleryId(getState(), { galleryId }));
   };
 }
 

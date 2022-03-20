@@ -13,6 +13,9 @@ import type { DropFile } from 'app/components/Upload/ImageUpload';
 import type { ID, ActionGrant } from 'app/models';
 import type { GalleryPictureEntity } from 'app/reducers/galleryPictures';
 import Button from 'app/components/Button';
+import JsZip from 'jszip';
+import FileSaver from 'file-saver';
+import LoadingIndicator from 'app/components/LoadingIndicator';
 
 type Props = {
   gallery: Object,
@@ -30,11 +33,13 @@ type Props = {
 
 type State = {
   upload: boolean,
+  downloading: boolean,
 };
 
 export default class GalleryDetail extends Component<Props, State> {
   state = {
     upload: false,
+    downloading: false,
   };
 
   toggleUpload = (response?: File | Array<DropFile>) => {
@@ -47,6 +52,63 @@ export default class GalleryDetail extends Component<Props, State> {
 
   handleClick = (picture: Object) => {
     this.props.push(`/photos/${this.props.gallery.id}/picture/${picture.id}`);
+  };
+
+  downloadGallery = () => {
+    this.setState({ downloading: true });
+    const finishDownload = () => this.setState({ downloading: false });
+    // Make sure all pictures are fetched before download and zipping
+    let blobs = [];
+    this.downloadNext(false, 0, 0, blobs)
+      .then(({ pictures, blobs })=> {
+        console.log("Finished download");
+        console.log(pictures);
+        console.log(blobs);
+        const names = pictures.map((picture) =>
+          picture.file.split('/').pop()
+        );
+        console.log(names);
+        this.zipFiles(this.props.gallery.title, names, blobs).finally(
+          finishDownload
+        )
+      }).catch(finishDownload);
+  };
+
+  downloadNext = (next, index, accum, blobsAccum) => {
+    return this.props.fetch(this.props.gallery.id, {next:next,filters:{}}).then((pictures) => {
+      const extra = pictures.length - accum;
+      accum = pictures.length;
+      const urls = pictures.slice(index).map((picture) => picture.rawFile);
+      console.log(urls);
+      index += extra;
+      console.log(index);
+      return this.downloadFiles(urls)
+        .then((blobs) => {
+          blobsAccum.push(...blobs);
+          console.log(blobsAccum);
+          console.log(this.props.hasMore);
+          if (this.props.hasMore) {
+            return this.downloadNext(true,index,accum,blobsAccum);
+          }
+          console.log({ pictures, blobsAccum });
+          return { pictures, blobs: blobsAccum };
+        });
+    })
+  }
+
+  downloadFiles = (urls: string[]) =>
+    Promise.all(
+      urls.map(async (url) => await fetch(url).then((res) => res.blob()))
+    );
+
+  zipFiles = (zipTitle: string, fileNames: string[], blobs: Blob[]) => {
+    const zip = JsZip();
+    blobs.forEach((blob, i) => {
+      zip.file(fileNames[i], blob);
+    });
+    return zip
+      .generateAsync({ type: 'blob' })
+      .then((zipFile) => FileSaver.saveAs(zipFile, `${zipTitle}.zip`));
   };
 
   render() {
@@ -68,7 +130,20 @@ export default class GalleryDetail extends Component<Props, State> {
         <Helmet title={gallery.title} />
         <NavigationTab
           title={gallery.title}
-          details={<GalleryDetailsRow gallery={gallery} showDescription />}
+          details={
+            <>
+              <GalleryDetailsRow gallery={gallery} showDescription />
+              <div style={{ minHeight: '40px' }}>
+                {this.state.downloading ? (
+                  <LoadingIndicator loading={true} small margin={0} />
+                ) : (
+                  <Button flat={true} onClick={this.downloadGallery}>
+                    Last ned album
+                  </Button>
+                )}
+              </div>
+            </>
+          }
         >
           <NavigationLink
             onClick={(e: Event) => {
