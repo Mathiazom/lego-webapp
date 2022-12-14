@@ -1546,13 +1546,13 @@
     "@sentry/utils" "6.19.2"
     tslib "^1.9.3"
 
-"@sentry/integrations@^6.19.2":
-  version "6.19.2"
-  resolved "https://registry.yarnpkg.com/@sentry/integrations/-/integrations-6.19.2.tgz#d5abcab94ae23ada097eb454c269e9ab573e14bb"
-  integrity sha512-RjkZXPrtrM+lJVEa4OpZ9CYjJdkpPoWslEQzLMvbaRpURpHFqmABGtXRAnJRYKmy6h7/9q9sABcDgCD4OZw11g==
+"@sentry/integrations@^7.26.0":
+  version "7.26.0"
+  resolved "https://registry.yarnpkg.com/@sentry/integrations/-/integrations-7.26.0.tgz#958e3ed52a37a14c6f11aebf11b485eca52e56aa"
+  integrity sha512-5tyBA5BnZEuosSIvBP7mJz66xJaZTb/k1EzHEc0hR2Mw8QpLgMneDZBfi4vdbhxtGpJKC/gURoUGZf9hpwW+DA==
   dependencies:
-    "@sentry/types" "6.19.2"
-    "@sentry/utils" "6.19.2"
+    "@sentry/types" "7.26.0"
+    "@sentry/utils" "7.26.0"
     localforage "^1.8.1"
     tslib "^1.9.3"
 
@@ -1584,12 +1584,25 @@
   resolved "https://registry.yarnpkg.com/@sentry/types/-/types-6.19.2.tgz#0219c9da21ed975951108b8541913b1966464435"
   integrity sha512-XO5qmVBdTs+7PdCz7fAwn1afWxSnRE2KLBFg5/vOdKosPSSHsSHUURSkxiEZc2QsR+JpRB4AeQ26AkIRX38qTg==
 
+"@sentry/types@7.26.0":
+  version "7.26.0"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.26.0.tgz#2fe8a38a143797abecbcd53175ebf8bf736e18de"
+  integrity sha512-U2s0q3ALwWFdHJBgn8nrG9bCTJZ3hAqL/I2Si4Mf0ZWnJ/KTJKbtyrputHr8wMbHvX0NZTJGTxFVUO46J+GBRA==
+
 "@sentry/utils@6.19.2":
   version "6.19.2"
   resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-6.19.2.tgz#995efb896c5159369509f4896c27a2d2ea9191f2"
   integrity sha512-2DQQ2OJaxjtyxGq5FmMlqb6hptsqMs2xoBiVRMkTS/rvyTrk1oQdKZ8ePwjtgX3nJ728ni3IXIyXV+vfGp4EBw==
   dependencies:
     "@sentry/types" "6.19.2"
+    tslib "^1.9.3"
+
+"@sentry/utils@7.26.0":
+  version "7.26.0"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-7.26.0.tgz#4b501064c5220947f210aa2d59e9b8bf60677502"
+  integrity sha512-nIC1PRyoMBi4QB7XNCWaPDqaQbPayMwAvUm6W3MC5bHPfVZmmFt+3sLZQKUD/E0NeQnJ3vTyPewPF/LfxLOE5A==
+  dependencies:
+    "@sentry/types" "7.26.0"
     tslib "^1.9.3"
 
 "@sinonjs/commons@^1.7.0":
